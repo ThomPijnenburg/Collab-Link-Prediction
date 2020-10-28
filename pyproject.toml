@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "lynks"
+version = "0.0.0"
+description = "Doing link prediction"
+authors = ["Thom Pijnenburg <example@test.com>"]
+maintainers = ["Thom Pijnenburg <example@test.com>"]
+license = ""
+readme = "README.md"
+homepage = ""
+repository = ""
+documentation = ""
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+keywords = [""]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+flake8 = "*"
+pytest-cov = "*"
+autopep8 = "*"
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+# [tool.poetry.scripts]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
