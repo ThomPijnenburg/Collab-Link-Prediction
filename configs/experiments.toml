@@ -1,0 +1,14 @@
+dataset_name = "ogbl-collab"
+
+[preprocessing]
+n_samples = 2020
+balancing = true
+
+[features]
+common_neighbors_count = false
+common_neighbor_centrality = false
+jaccard_coefficient = true
+adamic_adar_index = true
+preferential_attachment = true
+resource_allocation_index = true
+scaling = "normalise"
