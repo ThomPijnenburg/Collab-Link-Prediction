@@ -16,7 +16,7 @@ classifiers = [
 keywords = [""]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "3.7.8"
 ogb = "*"
 python-louvain = "^0.14"
 networkx = "*"
@@ -28,6 +28,8 @@ pytest-cov = "*"
 autopep8 = "*"
 jupyter = "*"
 seaborn = "*"
+jupyterlab = "^2.2.9"
+pylint = "^2.6.0"
 
 [tool.black]
 line-length = 88
