@@ -1,8 +1,8 @@
 dataset_name = "ogbl-collab"
 
 [preprocessing]
-n_samples = 2020
-balancing = true
+n_samples = 100
+sampling_fn = "random"
 
 [features]
 common_neighbors_count = false

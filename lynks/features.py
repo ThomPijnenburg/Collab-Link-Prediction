@@ -10,38 +10,19 @@ from sklearn.preprocessing import StandardScaler
 from .pipeline import create_pipeline
 from .data import Dataset
 
-def create_negative_sampler() -> Callable:
-    def negative_sampler(dataset: Dataset) -> Dataset:
-        return dataset
-
-    return negative_sampler
-
-
-def create_balancer(n_samples: int = -1) -> Callable:
-    def balancer(dataset: Dataset) -> Dataset:
-        if n_samples > 0:
-            edges_ = dataset.edges[:n_samples]
-            print(len(edges_))
-            dataset.edges = edges_
-
-        # TODO: do balancing
-
-        return dataset
-
-    return balancer
-
 
 def compute_lp_feature_for_dataset(dataset:dict, lp_callback: Callable, feat_slug:str, verbose: int = 0) -> dict:
     if verbose > 0:
         print("Computing {}...".format(feat_slug))
     G = dataset.graph
-    edge_tuples = dataset.edges
+    edge_tuples = dataset.samples
 
     try:
         preds = lp_callback(G, edge_tuples)
         preds_values = [p for _, _, p in preds]
     except:
-        preds_values = ["NotImplemented"]
+        print("Could not compute {}".format(feat_slug))
+        preds_values = np.full(len(edge_tuples), np.nan)
 
     dataset.features.append(preds_values)
     dataset.feature_names.append(feat_slug)
@@ -51,11 +32,11 @@ def compute_lp_feature_for_dataset(dataset:dict, lp_callback: Callable, feat_slu
 def create_feature_common_neighbors_count(verbose: int = 0):
     feat_slug = "common_neighbors_count"
 
-    def feat_common_neighbor_count(G, edge_tuples):
-        for (x, y) in edge_tuples:
-            commons = sorted(nx.common_neighbors(x, y))
-            print(commons)
-        return [(len(sorted(nx.common_neighbors(x, y))), x, y) for (x, y) in edge_tuples]
+    # def feat_common_neighbor_count(G, edge_tuples):
+    #     for (x, y) in edge_tuples:
+    #         commons = sorted(nx.common_neighbors(x, y))
+    #         print(commons)
+    #     return [(len(sorted(nx.common_neighbors(x, y))), x, y) for (x, y) in edge_tuples]
 
     def feat_common_neighbor_count(dataset: Dataset) -> Dataset:
         dataset = compute_lp_feature_for_dataset(dataset, feat_common_neighbor_count, feat_slug=feat_slug, verbose=verbose)
@@ -117,7 +98,12 @@ def create_feature_resource_allocation_index(verbose: int = 0):
 
 def create_feature_formatter(verbose: int = 0):
     def feature_formatter(dataset: Dataset) -> Dataset:
-        features = [np.array([feat]).T for feat in dataset.features if "NotImplemented" not in feat]
+        features = []
+        for index, feat in enumerate(dataset.features):
+            if not np.isnan(feat).any():
+                features.append(np.array([feat]).T)
+            else:
+                dataset.feature_names.pop(index)
         feats_np = np.concatenate(features, axis=1)
         dataset.features = feats_np
 

@@ -8,14 +8,16 @@ import numpy as np
 import pandas as pd
 
 from .pipeline import create_pipeline
+from .logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class Dataset(object):
-    def __init__(self, lpdata: dict):
-        print("I am custom you know")
+    def __init__(self, lpdata: dict, samples: list):
+        logger.info("I am custom you know")
 
-        self.raw_edges = lpdata["edge"]
-
+        self.edges = lpdata["edge"]
         self.edge_weight_label = "weight"
         self.edge_year_label = "year"
         self.edge_attributes = {
@@ -24,8 +26,9 @@ class Dataset(object):
         }
         self.graph = None
 
-        self.edges = self.raw_edges
-        self.labels = None
+        self.samples = samples
+        self.labels = np.ones(len(samples))
+
         self.features = []
         self.feature_names = []
 
@@ -36,14 +39,13 @@ def split_list(a, n):
 
 
 def split_dataset(dataset: Dataset, n_slices: int) -> list:
-    edges = dataset.edges
-    n_edges = len(edges)
-    split_edges = split_list(edges, n_slices)
+    samples = dataset.samples
+    split_samples = split_list(samples, n_slices)
     result = []
 
-    for split in split_edges:
+    for split in split_samples:
         dataset_copy = deepcopy(dataset)
-        dataset_copy.edges = split
+        dataset_copy.samples = split
         result.append(dataset_copy)
 
     return result
@@ -52,7 +54,7 @@ def split_dataset(dataset: Dataset, n_slices: int) -> list:
 def merge_datasets(datasets: list) -> Dataset:
 
     def lambda_merge(d0, d1):
-        d0.edges = d0.edges + d1.edges
+        d0.samples = d0.samples + d1.samples
         d0.features = np.concatenate((d0.features, d1.features), axis=0)
         return d0
 
@@ -87,21 +89,19 @@ def create_graph_builder() -> Callable:
         years = dataset.edge_attributes[dataset.edge_year_label]
 
         dataset.graph = _build_graph(edges=edges, weights=weights, years=years)
-        dataset.edges = list(dataset.graph.edges)
+        dataset.nodes = list(dataset.graph.nodes)
+        # dataset.samples = list(dataset.graph.edges)
         return dataset
     return build_graph
 
 
 def create_formatter() -> Callable:
-    def formatter(edge_object) -> Dataset:
+    def formatter(data: tuple) -> Dataset:
+        edge_object = data[0]
+        samples = data[1]
+
         # could do something custom here
-        dataset = Dataset(lpdata=edge_object)
-
-        labels = np.ones(dataset.edges.shape[0])
-        edges = list(map(tuple, dataset.edges))
-
-        dataset.edges = edges
-        dataset.labels = labels
+        dataset = Dataset(lpdata=edge_object, samples=samples)
         return dataset
 
     return formatter
