@@ -7,7 +7,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from .pipeline import create_pipeline
+from .helpers import create_pipeline
 from .logging import get_logger
 
 logger = get_logger(__name__)

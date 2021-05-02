@@ -10,8 +10,7 @@ from sklearn.preprocessing import StandardScaler
 
 from typing import Union, Callable
 
-from .pipeline import create_pipeline
-from .data import Dataset
+from .helpers import create_pipeline
 from .logging import get_logger
 
 
