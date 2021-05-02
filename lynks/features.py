@@ -1,8 +1,6 @@
-import joblib
 import networkx as nx
 import numpy as np
 
-# from collections.abc import Callable
 from collections.abc import Iterable
 from pathlib import Path
 from sklearn.preprocessing import MinMaxScaler
@@ -31,8 +29,10 @@ def compute_lp_feature(graph: nx.Graph, edge_tuples: Iterable, lp_callback: Call
     try:
         feats = lp_callback(graph, edge_tuples)
         feat_values = np.array([p for _, _, p in feats])  # todo maybe return the nodes as well
-    except:
-        logger.warn("Could not compute {}".format(str(lp_callback)))
+    except Exception as e:
+        logger.warn(f"Could not compute {str(lp_callback)}")
+        logger.warn(f"Error: {e}")
+
         feat_values = np.full(len(edge_tuples), np.nan)
 
     return feat_values
