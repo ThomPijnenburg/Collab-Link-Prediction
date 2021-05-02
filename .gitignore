@@ -141,3 +141,4 @@ cython_debug/
 notebooks/dataset/*
 .vscode
 .python-version
+.idea
