@@ -4,8 +4,6 @@ import numpy as np
 from collections.abc import Callable
 from random import randint
 
-from .data import Dataset
-
 
 def sample_random(elements: list, n_samples: int) -> list:
     sampled_combinations = set()
@@ -22,48 +20,21 @@ def sample_random(elements: list, n_samples: int) -> list:
     return list(sampled_combinations)
 
 
-def create_random_sampler() -> Callable:
-    def random_sampler(dataset: Dataset) -> Dataset:
-        print("Sampling stuff...")
-        samples = dataset.samples
-        labels = dataset.labels
-        sample_nodes = list(itertools.chain(*samples))
-
-        negatives = sample_random(sample_nodes, len(samples))
-        negative_labels = np.zeros(len(negatives))
-
-        dataset.samples = samples + negatives
-        dataset.labels = np.concatenate((labels, negative_labels))
-
-        return dataset
+def create_random_sampler(n_samples_per_positive: int) -> Callable:
+    def random_sampler(positive_batch) -> list:
+        sample_nodes = list(itertools.chain(*positive_batch))
+        negatives = sample_random(sample_nodes, n_samples_per_positive)
+        return negatives
 
     return random_sampler
 
-def create_currupt_sampler() -> Callable:
-    def corrupt_sampler(dataset: Dataset) -> Dataset:
-        return dataset
 
-    return corrupt_sampler
-
-
-def create_sampler(method: str = "random", n_samples: int = -1) -> Callable:
-    def sampler(dataset: Dataset) -> Dataset:
-        # if n_samples > 0:
-        #     samples_ = dataset.samples[:n_samples]
-        #     dataset.samples = samples_
-            
-        #     labels_ = dataset.labels[:n_samples]
-        #     dataset.labels = labels_
-
-        sampling_fn = None
+def create_sampler(method: str = "random", n_samples_per_positive: int = -1) -> Callable:
+    def sampler(positive_batch) -> list:
 
         if method == "random":
-            sampling_fn = create_random_sampler()
+            sampling_fn = create_random_sampler(n_samples_per_positive)
 
-        if method == "corrupt":
-            sampling_fn = create_currupt_sampler()
-
-        return sampling_fn(dataset)
+        return sampling_fn(positive_batch)
 
     return sampler
-
