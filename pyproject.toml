@@ -33,7 +33,7 @@ jupyterlab = "^2.2.9"
 pylint = "^2.6.0"
 
 [tool.black]
-line-length = 88
+line-length = 120
 target-version = ['py37']
 include = '\.pyi?$'
 exclude = '''
