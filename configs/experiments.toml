@@ -1,8 +1,8 @@
 dataset_name = "ogbl-collab"
 
-[preprocessing]
-n_samples = 100
-sampling_fn = "random"
+[sampling]
+n_samples = 1
+sampling_fn = "basic"
 
 [features]
 common_neighbors_count = false
@@ -11,4 +11,7 @@ jaccard_coefficient = true
 adamic_adar_index = true
 preferential_attachment = true
 resource_allocation_index = true
+
+[model]
 scaling = "normalise"
+n_estimators = 201

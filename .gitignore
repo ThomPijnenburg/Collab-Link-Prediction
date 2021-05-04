@@ -137,8 +137,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# data within notebooks
+# data 
 notebooks/dataset/*
+dataset/*
+data/*
+
+#editor
 .vscode
 .python-version
 .idea

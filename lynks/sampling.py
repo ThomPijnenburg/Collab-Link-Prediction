@@ -1,5 +1,4 @@
 import itertools
-import numpy as np
 
 from collections.abc import Callable
 from random import randint
@@ -12,8 +11,8 @@ def sample_random(elements: list, n_samples: int) -> list:
         # Choose one random item from each list; that forms an element
 
         elem = tuple([
-            elements[randint(0, len(elements)-1)],
-            elements[randint(0, len(elements)-1)]])
+            elements[randint(0, len(elements) - 1)],
+            elements[randint(0, len(elements) - 1)]])
         # Using a set elminates duplicates easily
         sampled_combinations.add(elem)
 
