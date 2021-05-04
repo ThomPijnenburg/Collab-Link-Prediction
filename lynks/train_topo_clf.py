@@ -24,7 +24,7 @@ def main(config_path: str, data_dir: str, result_dir: str, n_proc: int):
     # Write
     #
     data_dir = Path(data_dir)
-    logger.info(f"Writing features to {data_dir}")
+    logger.info(f"Loading features from {data_dir}")
 
     X_train = np.load(data_dir.joinpath("X_train.npy"))
     y_train = np.load(data_dir.joinpath("y_train.npy"))
