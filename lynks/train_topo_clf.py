@@ -74,11 +74,14 @@ def featurise_triples(positive_triples, negative_triples, feat_pipe):
     return X_train, y_train
 
 
-def main(config_path: str, out_dir: str):
+def main(config_path: str, out_dir: str, n_proc: int):
     config_path = Path(config_path)
 
     configuration = load_config(config_path)
 
+    #
+    # Load data
+    #
     logger.info(f"Loading dataset {configuration.get('dataset_name')}...")
     lp_dataset = LinkPropPredDataset(configuration['dataset_name'])
 
@@ -86,6 +89,9 @@ def main(config_path: str, out_dir: str):
 
     train_edge, valid_edge, test_edge = split_edge["train"], split_edge["valid"], split_edge["test"]
 
+    #
+    # Format data
+    #
     train_df = edge_data_to_df(train_edge).drop_duplicates(subset=[SRC, EDG, TGT])
     valid_df = edge_data_to_df(valid_edge).drop_duplicates(subset=[SRC, EDG, TGT])
     test_df = edge_data_to_df(test_edge).drop_duplicates(subset=[SRC, EDG, TGT])
@@ -100,7 +106,7 @@ def main(config_path: str, out_dir: str):
         Test triples {len(train_triples_factory.mapped_triples)}")
 
     #
-    # generate negatives
+    # Sample negatives
     #
     num_negs_per_pos = configuration.get("sampling").get("n_samples")
     logger.info(f"Sampling {num_negs_per_pos} negatives per positive.")
@@ -137,16 +143,16 @@ def main(config_path: str, out_dir: str):
         verbose=1
     )
 
-    # train features
+    # Train features
     logger.info("Generating features for train...")
     X_train, y_train = featurise_triples(train_triples_factory.mapped_triples, train_negatives, topo_feature_pipeline)
     logger.info(f"Shape of X: {X_train.shape}, y: {y_train.shape}")
 
-    # valid features
+    # Valid features
     logger.info("Generating features for valid...")
     X_valid, y_valid = featurise_triples(valid_triples_factory.mapped_triples, valid_negatives, topo_feature_pipeline)
 
-    # test features
+    # Test features
     logger.info("Generating features for test...")
     X_test, y_test = featurise_triples(test_triples_factory.mapped_triples, test_negatives, topo_feature_pipeline)
 
@@ -157,9 +163,12 @@ def main(config_path: str, out_dir: str):
 
     model_configuration = configuration.get("model")
 
-    model = RandomForestClassifier(n_estimators=model_configuration.get("n_estimators"))
+    model = RandomForestClassifier(n_estimators=model_configuration.get("n_estimators"), n_jobs=n_proc)
     model.fit(X_train, y_train)
 
+    #
+    # Validate clf
+    #
     y_pred_valid = model.predict(X_valid)
     logger.info(classification_report(y_valid, y_pred_valid))
 
@@ -170,6 +179,7 @@ if __name__ == "__main__":
                         help="Path to experiment config toml file")
     parser.add_argument("--out_dir", type=str,
                         help="path to directory to write trained models")
-
+    parser.add_argument("--n_proc", type=int,
+                        help="number of processes")
     args = parser.parse_args()
-    main(args.config_path, args.out_dir)
+    main(args.config_path, args.out_dir, args.n_proc)
