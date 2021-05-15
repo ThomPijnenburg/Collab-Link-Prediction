@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 
 
 def pipeline_cartridge_for_feature(feature_function: Callable) -> Callable:
+    """Construct standardised function from Networkx callback"""
     def mutating_feature_function(edges: Iterable, features: Iterable, feature_labels: Iterable) -> tuple:
         feat_values, feat_slug = feature_function(edges)
         features.append(feat_values)
@@ -27,6 +28,7 @@ def pipeline_cartridge_for_feature(feature_function: Callable) -> Callable:
 
 
 def compute_lp_feature(graph: nx.Graph, edges: Iterable, lp_callback: Callable, verbose: int = 0) -> np.array:
+    """Perform callback"""
     try:
         feats = lp_callback(graph, edges)
         feat_values = np.array([[p for _, _, p in feats]]).T  # todo maybe return the nodes as well
@@ -61,6 +63,13 @@ def create_feature_common_neighbor_centrality(graph: nx.Graph, verbose: int = 0)
     label = "common_neighbor_centrality"
 
     def feat_common_neighbor_centrality(edges: Iterable) -> tuple:
+        """Compute common neighbor centrality. This algorithm is based on two properties of nodes:
+        i) common neighbors, ii) their centrality. This measure is a weighted sum of the two parameters.
+
+        ref: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx\
+            .algorithms.link_prediction.common_neighbor_centrality.html#networkx.algorithms\
+            .link_prediction.common_neighbor_centrality
+        """
         if verbose > 0:
             logger.info("Computing {}...".format(label))
         feat_values = compute_lp_feature(graph, edges, nx.common_neighbor_centrality, verbose=verbose)
@@ -73,6 +82,12 @@ def create_feature_jaccard_coefficient(graph: nx.Graph, verbose: int = 0) -> Cal
     label = "jaccard_coefficient"
 
     def feat_jaccard_coefficient(edges: Iterable) -> tuple:
+        """Compute Jaccard Coefficient. This measure defines the overlap of the neighbors of u and v.
+
+        ref: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx\
+            .algorithms.link_prediction.jaccard_coefficient.html#networkx.algorithms\
+            .link_prediction.jaccard_coefficient
+        """
         if verbose > 0:
             logger.info("Computing {}...".format(label))
         feat_values = compute_lp_feature(graph, edges, nx.jaccard_coefficient, verbose=verbose)
@@ -85,6 +100,13 @@ def create_feature_adamic_adar_index(graph: nx.Graph, verbose: int = 0):
     label = "adamic_adar_index"
 
     def feat_adamic_adar_index(edges: Iterable) -> tuple:
+        """Compute Adamic Adar index. This measure reflects the connectivity of the
+        common neighbors of u and v
+
+        ref: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx\
+            .algorithms.link_prediction.adamic_adar_index.html#networkx.algorithms.\
+            link_prediction.adamic_adar_index
+        """
         if verbose > 0:
             logger.info("Computing {}...".format(label))
         feat_values = compute_lp_feature(graph, edges, nx.adamic_adar_index, verbose=verbose)
@@ -97,6 +119,13 @@ def create_feature_preferential_attachment(graph: nx.Graph, verbose: int = 0):
     label = "preferential_attachment"
 
     def feat_preferential_attachment(edges: Iterable) -> tuple:
+        """Compute Preferential Attachment. PA is the multiplication of the number of neighbors of
+        u and v.
+
+        ref: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.\
+            algorithms.link_prediction.preferential_attachment.html#networkx.algorithms\
+            .link_prediction.preferential_attachment
+        """
         if verbose > 0:
             logger.info("Computing {}...".format(label))
         feat_values = compute_lp_feature(graph, edges, nx.preferential_attachment, verbose=verbose)
@@ -109,6 +138,13 @@ def create_feature_resource_allocation_index(graph: nx.Graph, verbose: int = 0):
     label = "resource_allocation_index"
 
     def feat_resource_allocation_index(edges: Iterable) -> tuple:
+        """Compute Resource Allocation index. A different measure of the sum of inverse connectivity
+        of the common neighbors of u and v.
+
+        ref: https://networkx.org/documentation/stable/reference/algorithms/generated/networkx\
+            .algorithms.link_prediction.resource_allocation_index.html#networkx.algorithms\
+            .link_prediction.resource_allocation_index
+        """
         if verbose > 0:
             logger.info("Computing {}...".format(label))
         feat_values = compute_lp_feature(graph, edges, nx.resource_allocation_index, verbose=verbose)
@@ -145,6 +181,9 @@ def create_graph_topology_featuriser(
         graph_backbone: nx.Graph, common_neighbors_count: bool, common_neighbor_centrality: bool,
         jaccard_coefficient: bool, adamic_adar_index: bool, preferential_attachment: bool,
         resource_allocation_index: bool, verbose: int = 0) -> Callable:
+    """Create feature function given backbone graph and configuration. The backbone graph
+    is used to compute all network features for mapped triples.
+    """
     def graph_topology_featuriser(mapped_triples) -> tuple:
         features = []
         feature_labels = []
