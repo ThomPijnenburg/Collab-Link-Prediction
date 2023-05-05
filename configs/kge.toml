@@ -1,0 +1,20 @@
+dataset = "ogbl-collab"
+model = "TransE"
+regularizer = "LpRegularizer"
+evaluator = "RankBasedEvaluator"
+
+[training]
+num_epochs = 300
+use_tqdm_batch = true
+
+[optimizer]
+lr = 0.001
+
+[RankBasedEvaluator]
+ks = [1, 3, 5, 10, 50]
+
+[LpRegularizer]
+weight = 1.0
+
+[TransE]
+embedding_dim = 128
