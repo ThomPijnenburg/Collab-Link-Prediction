@@ -1,9 +1,17 @@
 import networkx as nx
 import numpy as np
+import pandas as pd
 
 from .logging import get_logger
 
 logger = get_logger(__name__)
+
+EDG = "edg"
+SRC = "src"
+TGT = "tgt"
+EDGE_LABEL = "collaborated"
+WEIGHT = "weight"
+YEAR = "year"
 
 
 def build_graph(triples, weights, years) -> nx.MultiGraph:
@@ -24,3 +32,12 @@ def build_graph(triples, weights, years) -> nx.MultiGraph:
         else:
             G.add_edge(u, v, weight=w)
     return G
+
+
+def edge_data_to_df(edge_data) -> pd.DataFrame:
+    triples_df = pd.DataFrame(edge_data["edge"], columns=[SRC, TGT], dtype=str)
+    triples_df[EDG] = EDGE_LABEL
+    triples_df[WEIGHT] = edge_data["weight"]
+    triples_df[YEAR] = edge_data["year"]
+
+    return triples_df

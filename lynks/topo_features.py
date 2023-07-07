@@ -12,17 +12,14 @@ from lynks.features import create_graph_topology_featuriser
 from lynks.features import create_feature_formatter
 from lynks.logging import get_logger
 
+from lynks.data import edge_data_to_df
+from lynks.data import EDG, SRC, TGT
+from lynks.data import EDGE_LABEL, WEIGHT, YEAR
+
 from pykeen.sampling import BasicNegativeSampler
 from pykeen.triples import TriplesFactory
 
 logger = get_logger(__file__)
-
-EDG = "edg"
-SRC = "src"
-TGT = "tgt"
-EDGE_LABEL = "collaborated"
-WEIGHT = "weight"
-YEAR = "year"
 
 
 def triples_factory_from_edge_data(triples_df: pd.DataFrame, reuse_mappings: TriplesFactory or None = None) -> TriplesFactory:
@@ -38,15 +35,6 @@ def triples_factory_from_edge_data(triples_df: pd.DataFrame, reuse_mappings: Tri
         triples_factory = TriplesFactory.from_labeled_triples(triples_np)
 
     return triples_factory
-
-
-def edge_data_to_df(edge_data) -> pd.DataFrame:
-    triples_df = pd.DataFrame(edge_data["edge"], columns=[SRC, TGT], dtype=str)
-    triples_df[EDG] = EDGE_LABEL
-    triples_df[WEIGHT] = edge_data["weight"]
-    triples_df[YEAR] = edge_data["year"]
-
-    return triples_df
 
 
 def featurise_triples(positive_triples, negative_triples, feat_pipe):
